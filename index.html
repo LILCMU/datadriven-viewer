@@ -6,7 +6,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="author" content="Marutpong Chailangka">
 	<link href="bootswatch/paper/bootstrap.min.css" rel="stylesheet">
-	<!-- <link rel="stylesheet" href="bootstrap-chosen/bootstrap.css" /> -->
 	<style>
 		.top-buffer { margin-top:20px; }
 		input.ng-invalid {
@@ -56,8 +55,11 @@
 
 							<div class="form-group">
 								<label for="inputresults" class="col-sm-3 control-label">Result</label>
-								<div class="col-sm-9">
-									<input ng-model="data.results" type="number" min="1" class="form-control" name="results" id="inputresults" placeholder="Results">
+								<div class="col-sm-5">
+									<input ng-model="data.results" type="number" min="1" class="form-control" name="results" id="inputresults" placeholder="Points">
+								</div>
+								<div class="col-sm-4">
+									<input ng-model="data.days" type="number" min="1" class="form-control" name="days" id="inputdays" placeholder="Days">
 								</div>
 							</div>
 
@@ -71,6 +73,22 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="form-group">
+						      <label class="col-sm-3 control-label">Display</label>
+						      <div class="col-sm-9">
+						        <div class="radio">
+						          <label>
+						            <input ng-model="data.display" type="radio" value="single">
+						            Single View
+						          </label>
+						          <label>
+						            <input ng-model="data.display" type="radio" value="separate">
+						            Separate View
+						          </label>
+						        </div>
+						      </div>
+						    </div>
 
 							<legend ng-hide="isEmpty()">Fields</legend>
 							<div ng-hide="isEmpty()" class="well" >
@@ -157,10 +175,7 @@
 	<script src="bootswatch/bower_components/jquery/dist/jquery.min.js"></script>
 	<script src="bootswatch/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 	<script src="angular.min.js"></script>
-	<!-- <script src="bootstrap-material-design/dist/js/material.min.js"></script> -->
 
-	<!-- new -->
-	<!-- <script src="bootstrap-chosen/chosen.jquery.js"></script> -->
 	<script>
 		var serverURL = "https://data.learninginventions.org/channels/";
 		$(function() {
@@ -203,7 +218,7 @@
 		var app = angular.module("ddvApp", []);
 
 		app.controller("ddvCtrl", function($scope,$http) {
-			$scope.data = {dynamic: true};
+			$scope.data = {dynamic: true, display:'single', action: "show.html"};
 			$scope.channel = {};
 			$scope.fields = {};
 			$scope.types = ["line","column","spline","step"];
@@ -224,14 +239,15 @@
                 }
             );
 
-            // $scope.updateDataTypes = function() {
-            //     var listType=[];
-            //     for (field in $scope.fields){
-            //     	listType.push($scope.fields[field].type);
-            //     }
-            //     $scope.data.types = listType.join(",");
-            //     $('[name=types]').val(listType.join(","));
-            // };
+            $scope.$watch("data.display",
+                function handleChange( newValue, oldValue ) {
+                    if(newValue=="separate"){
+                    	$('#select_data_form').attr('action','show_multi.html');
+                    } else {
+                    	$('#select_data_form').attr('action',$scope.data.action);
+                    }
+                }
+            );
 
             $scope.updateDataSelected = function() {
             	console.log("ok");

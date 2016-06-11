@@ -10,6 +10,7 @@ var validTypes = ["line","column","spline"];
 var isLoading = {};
 var seriesOptions = [],
 seriesCounter = 0,
+
 // create the chart when all data is loaded
 createChart = function () {
 	var channelID = Number(getUrlParameter("channelID"));
@@ -106,23 +107,36 @@ createChart = function () {
 	});
 };
 
-$(function () {
-	params = getUrlParameter();
-	validateParams();
+var updateChannelShow = function(data){
+	channel = $.extend(channel, data.channel);
+	setFields(data);
+	initData(data);
+}
 
-	//Fetch channel information
-	$.getJSON( serverURL+params.channelID+"/feeds.json?results=0&api_key="+params.api_key,    function (data) {
+var updateChannelMultiShow = function(data){
+	channel = $.extend(channel, data.channel);
+	setFields(data);
 
-			channel = $.extend(channel, data.channel);
-			setFields(data);
-			initData(data);
+	var template = $('<iframe src="show.html" width="100%" height="400px" style="border: 0px"></iframe>');
+	var params_clone = params;
+	delete params_clone.types;
+	delete params_clone.fields;
 
-	}).fail(function() {
-    alert("Invalid parametors");
-  });
+	for (fieldi in channel.data){
+		var field = channel.data[fieldi];
+		var $iframe = $(template).clone();
+		var src = "show.html?"+$.param( $.extend(params_clone, {fields:field.field, types:field.type} ) );
+		$iframe.attr("src", src);
+		$('#container').append($iframe);
+	}
+}
 
+function getChannelInfo(callback){
+	$.getJSON( serverURL+params.channelID+"/feeds.json?results=0&api_key="+params.api_key, callback).fail(function() {
+	    alert("Invalid parametors");
+	});
 
-});
+}
 
 function initData(object){
 	console.log("Loading...");
@@ -180,47 +194,45 @@ function initData(object){
 
 	$.each(channel.list, function (i, name) {
 
-			var option = config;//{results : config.results, api_key : params.api_key}
-			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
+		var option = config;//{results : config.results, api_key : params.api_key}
+		var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
 
-			$.getJSON(fetch_url,    function (data) {
+		$.getJSON(fetch_url,    function (data) {
 
-					var list = []
-					if (data.feeds){
-							$.each(data.feeds, function (index, record) {
-									if(record[fieldTxt+name]){
-										var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
-										list.push( [parsedData.datetime, parsedData.value ] )
-									};
-							});
-					}
+				var list = []
+				if (data.feeds){
+						$.each(data.feeds, function (index, record) {
+								if(record[fieldTxt+name]){
+									var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
+									list.push( [parsedData.datetime, parsedData.value ] )
+								};
+						});
+				}
 
-					// Store last upadted
-					if (list.length>0){
-						channel.data[name].updated_at = channel.updated_at;
-						channel.updated_at = data.channel.updated_at;
-					}
+				// Store last upadted
+				if (list.length>0){
+					channel.data[name].updated_at = channel.updated_at;
+					channel.updated_at = data.channel.updated_at;
+				}
 
-					isLoading[name] =  false;
+				isLoading[name] =  false;
 
-					console.log(name);
-					seriesOptions[i] = {
-							name: channel.data[name].name,
-							data: list,
-							type: ( validTypes.indexOf(channel.data[name].type) > -1  ? channel.data[name].type : 'line' ),
-							step: channel.data[name].type=="step" ? 'left' : false
-					};
-					console.log(seriesOptions[i]);
+				seriesOptions[i] = {
+						name: channel.data[name].name,
+						data: list,
+						type: ( validTypes.indexOf(channel.data[name].type) > -1  ? channel.data[name].type : 'line' ),
+						step: channel.data[name].type=="step" ? 'left' : false
+				};
 
-					// As we're loading the data asynchronously, we don't know what order it will arrive. So
-					// we keep a counter and create the chart when all the data is loaded.
-					seriesCounter += 1;
+				// As we're loading the data asynchronously, we don't know what order it will arrive. So
+				// we keep a counter and create the chart when all the data is loaded.
+				seriesCounter += 1;
 
-					if (seriesCounter === channel.names.length) {
-							createChart();
-					}
+				if (seriesCounter === channel.names.length) {
+						createChart();
+				}
 
-			});
+		});
 	});
 	return;
 }
@@ -272,7 +284,7 @@ function getLogNames(object){
 	var names = [];
 	if (object.channel){
 		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
-				channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
+			channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
 		}
 	}
 	return names;
@@ -292,20 +304,20 @@ function setFields(object){
 	if (object.channel){
 		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
 
-				if ( ( params.fields && params.fields.indexOf(fieldTxt+i)>-1) || !params.fields){
-					channel.data[i] = {
-						i			:	i,
-						field	: fieldTxt+i,
-						label	: object.channel[fieldTxt+i],
-						name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i],
-						type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
-					}
-
-					channel.fields.push(fieldTxt+i);
-					channel.list.push(i);
-					channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
-					fieldIndex++;
+			if ( ( params.fields && params.fields.indexOf(fieldTxt+i)>-1) || !params.fields){
+				channel.data[i] = {
+					i			:	i,
+					field	: fieldTxt+i,
+					label	: object.channel[fieldTxt+i],
+					name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i],
+					type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
 				}
+
+				channel.fields.push(fieldTxt+i);
+				channel.list.push(i);
+				channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
+				fieldIndex++;
+			}
 				
 		}
 	}
@@ -316,7 +328,7 @@ function getLogNameFromUrl() {
 }
 
 function getReduce() {
-		return getUrlParameter("average")=="true";
+	return getUrlParameter("average")=="true";
 }
 
 function parseDataLog(data){
@@ -329,36 +341,36 @@ function parseDataLog(data){
 
 function handleLoaded(series){
 
-		 if (config.dynamic) {
-
-			 // push data every 5 seconds
-				 setInterval(function() {
-
-					 var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
-					 var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
-
-					 $.getJSON(fetch_url,    function (data) {
-
-						 if (data.feeds){
-							 $.each(data.feeds, function (index, record) {
-
-								 $.each(channel.list, function (i, name) {
-
-									 if(record.created_at != channel.updated_at && record[fieldTxt+name]){
-										 var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
-										 series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
-									 };
-
-									 channel.data[name].updated_at = data.channel.updated_at;
-									 channel.updated_at = data.channel.updated_at;
-								 });
-
-							 });
-						 }
-
-					 });
-				 }, 5000);
-
-		 }
+	if (!config.dynamic) {
 		return;
+	}
+
+	// push data every 5 seconds
+	setInterval(function() {
+
+		var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
+		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
+
+		$.getJSON(fetch_url,    function (data) {
+
+			if (data.feeds){
+				$.each(data.feeds, function (index, record) {
+
+					$.each(channel.list, function (i, name) {
+
+						if(record.created_at != channel.updated_at && record[fieldTxt+name]){
+							var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
+							series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
+						};
+
+						channel.data[name].updated_at = data.channel.updated_at;
+						channel.updated_at = data.channel.updated_at;
+					});
+
+				});
+			}
+
+		});
+	}, 5000);
+
 }
