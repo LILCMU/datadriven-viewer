@@ -5,110 +5,106 @@ var config = { results:1000, dynamic:false };
 var fieldTxt = "field";
 var params	= {};
 var channel = {fields:[],names:[],data:{}};
-
+var validTypes = ["line","column","spline"];
 
 var isLoading = {};
 var seriesOptions = [],
-		seriesCounter = 0,
-		// create the chart when all data is loaded
-		createChart = function () {
-				var channelID = Number(getUrlParameter("channelID"));
-				$('#container').highcharts('StockChart', {
-						chart : {
-								events : {
-										load : function () {
+seriesCounter = 0,
+// create the chart when all data is loaded
+createChart = function () {
+	var channelID = Number(getUrlParameter("channelID"));
+	$('#container').highcharts('StockChart', {
+		chart : {
+			events : {
+				load : function () {
+					var series2 = this.series.slice(0,this.series.length-1);
+					handleLoaded(series2);
+				}
+			}
+		},
 
-														var series2 = this.series.slice(0,this.series.length-1);
-														handleLoaded(series2);
+		title: {
+			text: channel.name
+		},
+		rangeSelector: {
+			buttons: [
+			{
+				type: 'minute',
+				count: 5,
+				text: '5min'
+			},
+			{
+				type: 'hour',
+				count: 1,
+				text: '1hr'
+			},
+			{
+				type: 'day',
+				count: 1,
+				text: '1d'
+			},
+			{
+				type: 'week',
+				count: 1,
+				text: '1w'
+			},
+			{
+				type: 'month',
+				count: 1,
+				text: '1m'
+			}, {
+				type: 'ytd',
+				text: 'YTD'
+			}, {
+				type: 'year',
+				count: 1,
+				text: '1y'
+			}, {
+				type: 'all',
+				text: 'All'
+			}]
+		},
 
-										}
-								}
-						},
+		yAxis: {
+			// labels: {
+			//     formatter: function () {
+			//         return (this.value > 0 ? ' + ' : '') + this.value + '%';
+			//     }
+			// },
+			plotLines: [{
+				value: 0,
+				width: 2,
+				color: 'silver'
+			}]
+		},
 
-						title: {
-		            text: channel.name
-		        },
-						rangeSelector: {
-								//selected: 4,
-								buttons: [
-								{
-										type: 'minute',
-										count: 5,
-										text: '5min'
-								},
-								{
-										type: 'hour',
-										count: 1,
-										text: '1hr'
-								},
-								{
-										type: 'day',
-										count: 1,
-										text: '1d'
-								},
-								{
-										type: 'week',
-										count: 1,
-										text: '1w'
-								},
-								{
-										type: 'month',
-										count: 1,
-										text: '1m'
-								}, {
-										type: 'ytd',
-										text: 'YTD'
-								}, {
-										type: 'year',
-										count: 1,
-										text: '1y'
-								}, {
-										type: 'all',
-										text: 'All'
-								}]
-						},
+		legend: {
+			enabled: true,
+			layout: 'vertical',
+			align: 'right',
+			verticalAlign: 'middle',
+			borderWidth: 0
+		},
 
-						yAxis: {
-								// labels: {
-								//     formatter: function () {
-								//         return (this.value > 0 ? ' + ' : '') + this.value + '%';
-								//     }
-								// },
-								plotLines: [{
-										value: 0,
-										width: 2,
-										color: 'silver'
-								}]
-						},
+		plotOptions: {
+		// series: {
+		//     compare: 'percent'
+		// }
+			bar: {
+				dataLabels: {
+					enabled: true
+				}
+			}
+		},
 
-						legend: {
-							enabled: true,
-										layout: 'vertical',
-										align: 'right',
-										verticalAlign: 'middle',
-										borderWidth: 0
-								},
+		tooltip: {
+			pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+			valueDecimals: 2
+		},
 
-						plotOptions: {
-								// series: {
-								//     compare: 'percent'
-								// }
-								 bar: {
-										dataLabels: {
-												enabled: true
-										}
-								}
-
-						},
-
-						tooltip: {
-								pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
-								valueDecimals: 2
-						},
-
-						series: seriesOptions
-				});
-		};
+		series: seriesOptions
+	});
+};
 
 $(function () {
 	params = getUrlParameter();
@@ -184,7 +180,7 @@ function initData(object){
 
 	$.each(channel.list, function (i, name) {
 
-			var option = {results : config.results, api_key : params.api_key}
+			var option = config;//{results : config.results, api_key : params.api_key}
 			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
 
 			$.getJSON(fetch_url,    function (data) {
@@ -206,10 +202,15 @@ function initData(object){
 					}
 
 					isLoading[name] =  false;
+
+					console.log(name);
 					seriesOptions[i] = {
 							name: channel.data[name].name,
-							data: list
+							data: list,
+							type: ( validTypes.indexOf(channel.data[name].type) > -1  ? channel.data[name].type : 'line' ),
+							step: channel.data[name].type=="step" ? 'left' : false
 					};
+					console.log(seriesOptions[i]);
 
 					// As we're loading the data asynchronously, we don't know what order it will arrive. So
 					// we keep a counter and create the chart when all the data is loaded.
@@ -259,6 +260,7 @@ function validateParams(){
 	}
 	if ("days" in datas && Number(datas.days) ){
 		config.days = Number(datas.days);
+		delete config.results;
 	}
 
 	config.dynamic = ("dynamic" in datas && datas.dynamic=='true');
@@ -277,20 +279,34 @@ function getLogNames(object){
 }
 
 function setFields(object){
+
+	//changes params
+	params.types = decodeURIComponent(params.types).split(',');
+	if (params.fields){
+		params.fields = decodeURIComponent(params.fields).split(',');
+	}	
+	console.log(params.fields);
+
 	channel.list = [];
+	var fieldIndex = 0;
 	if (object.channel){
 		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
 
-				channel.data[i] = {
-					i			:	i,
-					field	: fieldTxt+i,
-					label	: object.channel[fieldTxt+i],
-					name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i]
-				}
+				if ( ( params.fields && params.fields.indexOf(fieldTxt+i)>-1) || !params.fields){
+					channel.data[i] = {
+						i			:	i,
+						field	: fieldTxt+i,
+						label	: object.channel[fieldTxt+i],
+						name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i],
+						type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
+					}
 
-				channel.fields.push(fieldTxt+i);
-				channel.list.push(i);
-				channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
+					channel.fields.push(fieldTxt+i);
+					channel.list.push(i);
+					channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
+					fieldIndex++;
+				}
+				
 		}
 	}
 }
@@ -328,7 +344,7 @@ function handleLoaded(series){
 
 								 $.each(channel.list, function (i, name) {
 
-									 if(record[fieldTxt+name]){
+									 if(record.created_at != channel.updated_at && record[fieldTxt+name]){
 										 var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
 										 series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
 									 };
