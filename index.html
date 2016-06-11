@@ -5,82 +5,127 @@
 	<title>Data-Driven Viewer</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="author" content="Marutpong Chailangka">
-	<!-- <link href="bootswatch/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"> -->
 	<link href="bootswatch/paper/bootstrap.min.css" rel="stylesheet">
-
-	<!-- <link href="bootstrap-material-design/dist/css/material-fullpalette.min.css" rel="stylesheet"> -->
-	<link rel="stylesheet" href="bootstrap-chosen/bootstrap.css" />
 	<style>
-	.top-buffer { margin-top:20px; }
+		.top-buffer { margin-top:20px; }
+		input.ng-invalid {
+			border-bottom: none;
+			-webkit-box-shadow: inset 0 -2px 0 #e51c23;
+			box-shadow: inset 0 -2px 0 #e51c23;
+		}
+		input.ng-valid {
+			/*background-color:lightgreen;*/
+		}
 	</style>
 </head>
-<body>
+<body >
+	<div ng-app="ddvApp" ng-controller="ddvCtrl" class="container">
+		<div class="row">
+			<div class="col-md-6 col-md-offset-3 text-center">
+				<h2 class="text-primary">Data-Driven Viewer</h2>
+			</div>
+		</div>
+		<form class="bs-component" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form">
+			<div class="row">
+				<div class="col-md-6 col-md-6 col-md-offset-3 col-md-offset-3">
 
-	<div class="container">
+						<div class="row block">
 
+							<div class="form-group hidden">
+								<div class="col-sm-12">
+									<select data-placeholder="choose data" multiple class="chosen-select" tabindex="8" name="name" id="chooser">
+										<option value=""></option>
+									</select>
+								</div>
+							</div>
 
-				<div class="row">
-					<div class="col-lg-6 col-lg-offset-3 text-center">
-						<h2 class="text-primary">Data-Driven Viewer</h2>
-					</div>
-				</div>
-				<form class="bs-component" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form">
-					<div class="row">
-						<div class="col-lg-6 col-md-6 col-lg-offset-3 col-md-offset-3">
+							<div class="form-group">
+								<label for="inputChannelID" class="col-sm-3 control-label">Channel ID</label>
+								<div class="col-sm-9">
+									<input ng-model="data.channelID" ng-change="ccc()" type="number" min="1" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID" required>
+								</div>
+							</div>
 
-							<!--<div class="form-group">
-							<label class="control-label">select log</label>
-							<div class="form-control-wrapper"><input class="form-control empty" id="name" name="name" type="text" style="cursor: auto;"><span class="material-input"></span></div>
-							</div> -->
-							<div class="row block">
+							<div class="form-group">
+								<label for="inputReadAPIKey" class="col-sm-3 control-label">Read API Key</label>
+								<div class="col-sm-9">
+									<input ng-model="data.api_key" type="text" minlength="16" maxlength="16" class="form-control" name="api_key" id="inputReadAPIKey" placeholder="Read API Key">
+								</div>
+							</div>
 
-								<div class="form-group hidden">
-									<div class="col-lg-12">
-										<select data-placeholder="choose data" multiple class="chosen-select" tabindex="8" name="name" id="chooser">
-											<option value=""></option>
-										</select>
+							<div class="form-group">
+								<label for="inputresults" class="col-sm-3 control-label">Result</label>
+								<div class="col-sm-5">
+									<input ng-model="data.results" type="number" min="1" class="form-control" name="results" id="inputresults" placeholder="Points">
+								</div>
+								<div class="col-sm-4">
+									<input ng-model="data.days" type="number" min="1" class="form-control" name="days" id="inputdays" placeholder="Days">
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label for="inputPassword" class="col-sm-3 control-label"></label>
+								<div class="col-sm-9">
+									<div class="checkbox">
+										<label>
+											<input ng-model="data.dynamic" type="checkbox" name="dynamic" checked="checked"> Dynamic Update
+										</label>
 									</div>
 								</div>
+							</div>
 
-								<div class="form-group top-buffer">
-						      <label for="inputChannelID" class="col-lg-3 control-label">Channel ID</label>
-						      <div class="col-lg-9">
-						        <input type="text" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID">
-						      </div>
-						    </div>
-
-								<div class="form-group top-buffer">
-						      <label for="inputReadAPIKey" class="col-lg-3 control-label">Read API Key</label>
-						      <div class="col-lg-9">
-						        <input type="text" class="form-control" name="api_key" id="inputReadAPIKey" placeholder="Read API Key">
-						      </div>
-						    </div>
-
-
-								<div class="form-group top-buffer">
-						      <label for="inputPassword" class="col-lg-3 control-label"></label>
-						      <div class="col-lg-9">
-						        <div class="checkbox">
+							<div class="form-group">
+						      <label class="col-sm-3 control-label">Display</label>
+						      <div class="col-sm-9">
+						        <div class="radio">
 						          <label>
-						            <input type="checkbox" name="dynamic" checked="checked"> Dynamic Update
+						            <input ng-model="data.display" type="radio" value="single">
+						            Single View
+						          </label>
+						          <label>
+						            <input ng-model="data.display" type="radio" value="separate">
+						            Separate View
 						          </label>
 						        </div>
 						      </div>
 						    </div>
 
+							<legend ng-hide="isEmpty()">Fields</legend>
+							<div ng-hide="isEmpty()" class="well" >
+								<div ng-repeat="x in fields" class="row">
+									<div class="col-sm-5">
+										<div class="checkbox">
+											<label>
+												<input ng-model="x.selected" ng-change="updateDataSelected()" type="checkbox">{{x.name}} {{channel[x.name]}}
+											</label>
+										</div>
+									</div>
+									<div class="col-sm-4 control-label hidden"></div>
+									<div class="col-sm-3">
+										<select ng-model="x.type" class="form-control" ng-change="updateDataSelected()">
+											<option value="">Display Type</option>
+											<option ng-repeat="x in types" value="{{x}}">{{x}}</option>
+										</select>
+									</div>
 
+								</div>
+
+								<input ng-model="data.types" type="hidden" name="types" value="">
+								<input ng-model="data.fields" type="hidden" name="fields" value="">
 							</div>
+
+						</div>
 
 							<!-- <div class="row block">
 								<div class="form-group">
-									<div class="col-lg-6 col-md-6">
+									<div class="col-sm-6 col-sm-6">
 										<div class="checkbox">
 											<label>
 												<input type="checkbox" name="average"><span class="checkbox-material"><span class="check"></span></span> Average sensor values by
 											</label>
 										</div>
 									</div>
-									<div class="col-lg-6 col-md-6">
+									<div class="col-sm-6 col-sm-6">
 										<select data-placeholder="choose log" class="form-control " name="by" style="height:36px;">
 											<option value="10minute">10minute</option>
 											<option value="hour">hour</option>
@@ -93,14 +138,14 @@
 
 							<!-- <div class="row" style="display:none;">
 								<div class="form-group">
-									<div class="col-lg-6">
+									<div class="col-sm-6">
 										<div class="checkbox">
 											<label>
 												<input type="checkbox" name="range"><span class="checkbox-material"><span class="check"></span></span> Range
 											</label>
 										</div>
 									</div>
-									<div class="col-lg-6">
+									<div class="col-sm-6">
 										<select data-placeholder="choose log" class="form-control " name="date_range" style="height:36px;">
 											<option value="10minute">10minute</option>
 											<option value="hour">hour</option>
@@ -112,30 +157,27 @@
 							</div> -->
 						<!--
 						<div class="form-group">
-						<div class="col-lg-10 col-lg-offset-4">
+						<div class="col-sm-10 col-sm-offset-4">
 						<button type="submit" class="btn btn-primary">Submit</button>
 						</div>
-						</div>	-->
-						</div>
-						<div class="col-lg-1 col-md-1 col-sm-12 text-center">
-						</div>
-						</div>
-						<div class="row text-center">
-							<div class="col-lg-1 col-md-1 col-lg-offset-5 col-md-offset-5 block">
-								<button class="btn btn-success" type="submit" id="btn_submit"><i class="mdi-navigation-arrow-forward"></i> Sumbit</button>
-							</div>
-						</div>
-				</form>
+					</div>	-->
+				</div>
+			</div>
+			<div class="row text-center">
+				<div class="col-sm-1 col-sm-offset-5 block">
+					<button class="btn btn-success" type="submit" id="btn_submit"><i class="mdi-navigation-arrow-forward"></i> Sumbit</button>
+				</div>
+			</div>
+		</form>
 
 	</div>
 
 	<script src="bootswatch/bower_components/jquery/dist/jquery.min.js"></script>
 	<script src="bootswatch/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-	<!-- <script src="bootstrap-material-design/dist/js/material.min.js"></script> -->
+	<script src="angular.min.js"></script>
 
-	<!-- new -->
-	<script src="bootstrap-chosen/chosen.jquery.js"></script>
 	<script>
+		var serverURL = "https://data.learninginventions.org/channels/";
 		$(function() {
 			$('.container').height($(window).height());
 		});
@@ -162,14 +204,97 @@
 				alert("Invalid Channel ID");
 				return false;
 			} else if ( datas.api_key && datas.api_key.length != 16 ) {
-					alert("Invalid Read API Key");
-					return false;
+				alert("Invalid Read API Key");
+				return false;
 			} else {
 				datas.dynamic = $('[name=dynamic]').prop( "checked" );
 				var redirect = url+"?"+$.param(datas);//+"&average="+is_avg+"&by="+by+"&range="+is_range+"&date_range="+date_range;
 				window.location.href = redirect;
 			}
 		}
+	</script>
+
+	<script>
+		var app = angular.module("ddvApp", []);
+
+		app.controller("ddvCtrl", function($scope,$http) {
+			$scope.data = {dynamic: true, display:'single', action: "show.html"};
+			$scope.channel = {};
+			$scope.fields = {};
+			$scope.types = ["line","column","spline","step"];
+			
+			$scope.ccc = function(){
+				// console.log($scope.data.channelID);
+			}
+
+			$scope.$watch("data.channelID",
+                function handleChange( newValue, oldValue ) {
+                    
+                    if(angular.isNumber(newValue)){
+                    	$scope.getChannel();
+                    } else {
+                    	$scope.channel = {}
+                    	$scope.updateFields()
+                    }
+                }
+            );
+
+            $scope.$watch("data.display",
+                function handleChange( newValue, oldValue ) {
+                    if(newValue=="separate"){
+                    	$('#select_data_form').attr('action','show_multi.html');
+                    } else {
+                    	$('#select_data_form').attr('action',$scope.data.action);
+                    }
+                }
+            );
+
+            $scope.updateDataSelected = function() {
+            	console.log("ok");
+                var listField=[];
+                var listType=[];
+
+                for (field in $scope.fields){
+                	if ($scope.fields[field].selected){
+                		listField.push(field);
+                		listType.push($scope.fields[field].type);
+                	}
+                	
+                }
+                $scope.data.fields = listField.join(",");
+                $scope.data.types = listType.join(",");
+
+                $('[name=fields]').val(listField.join(","));
+                $('[name=types]').val(listType.join(","));
+                console.log(listField.join(","));
+            };
+
+            $scope.getChannel = function(){
+            	$http.get(serverURL+$scope.data.channelID+"/feeds.json?results=0&api_key="+$scope.data.api_key)
+			    .then(function(response) {
+			        $scope.channel = response.data.channel;
+			        $scope.updateFields();
+			    }, function(response) {
+			        $scope.channel = {};
+			        $scope.updateFields();
+			    });
+            }
+
+            $scope.updateFields = function(){
+            	$scope.fields = {};
+
+            	for (var i = 1 ; (i <= 8) && ("field"+i in $scope.channel); i++) {
+            		// $scope.fields.push("field"+i);
+            		$scope.fields["field"+i] = {name:"field"+i, selected:true};
+            	}
+            }
+
+            $scope.isEmpty = function () {
+			    for (var i in $scope.fields) if ($scope.fields.hasOwnProperty(i)) return false;
+			    return true;
+			};
+		});
+
 	</script>
 </body>
 </html>

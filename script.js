@@ -5,128 +5,138 @@ var config = { results:1000, dynamic:false };
 var fieldTxt = "field";
 var params	= {};
 var channel = {fields:[],names:[],data:{}};
-
+var validTypes = ["line","column","spline"];
 
 var isLoading = {};
 var seriesOptions = [],
-		seriesCounter = 0,
-		// create the chart when all data is loaded
-		createChart = function () {
-				var channelID = Number(getUrlParameter("channelID"));
-				$('#container').highcharts('StockChart', {
-						chart : {
-								events : {
-										load : function () {
+seriesCounter = 0,
 
-														var series2 = this.series.slice(0,this.series.length-1);
-														handleLoaded(series2);
+// create the chart when all data is loaded
+createChart = function () {
+	var channelID = Number(getUrlParameter("channelID"));
+	$('#container').highcharts('StockChart', {
+		chart : {
+			events : {
+				load : function () {
+					var series2 = this.series.slice(0,this.series.length-1);
+					handleLoaded(series2);
+				}
+			}
+		},
 
-										}
-								}
-						},
+		title: {
+			text: channel.name
+		},
+		rangeSelector: {
+			buttons: [
+			{
+				type: 'minute',
+				count: 5,
+				text: '5min'
+			},
+			{
+				type: 'hour',
+				count: 1,
+				text: '1hr'
+			},
+			{
+				type: 'day',
+				count: 1,
+				text: '1d'
+			},
+			{
+				type: 'week',
+				count: 1,
+				text: '1w'
+			},
+			{
+				type: 'month',
+				count: 1,
+				text: '1m'
+			}, {
+				type: 'ytd',
+				text: 'YTD'
+			}, {
+				type: 'year',
+				count: 1,
+				text: '1y'
+			}, {
+				type: 'all',
+				text: 'All'
+			}]
+		},
 
-						title: {
-		            text: channel.name
-		        },
-						rangeSelector: {
-								//selected: 4,
-								buttons: [
-								{
-										type: 'minute',
-										count: 5,
-										text: '5min'
-								},
-								{
-										type: 'hour',
-										count: 1,
-										text: '1hr'
-								},
-								{
-										type: 'day',
-										count: 1,
-										text: '1d'
-								},
-								{
-										type: 'week',
-										count: 1,
-										text: '1w'
-								},
-								{
-										type: 'month',
-										count: 1,
-										text: '1m'
-								}, {
-										type: 'ytd',
-										text: 'YTD'
-								}, {
-										type: 'year',
-										count: 1,
-										text: '1y'
-								}, {
-										type: 'all',
-										text: 'All'
-								}]
-						},
+		yAxis: {
+			// labels: {
+			//     formatter: function () {
+			//         return (this.value > 0 ? ' + ' : '') + this.value + '%';
+			//     }
+			// },
+			plotLines: [{
+				value: 0,
+				width: 2,
+				color: 'silver'
+			}]
+		},
 
-						yAxis: {
-								// labels: {
-								//     formatter: function () {
-								//         return (this.value > 0 ? ' + ' : '') + this.value + '%';
-								//     }
-								// },
-								plotLines: [{
-										value: 0,
-										width: 2,
-										color: 'silver'
-								}]
-						},
+		legend: {
+			enabled: true,
+			layout: 'vertical',
+			align: 'right',
+			verticalAlign: 'middle',
+			borderWidth: 0
+		},
 
-						legend: {
-							enabled: true,
-										layout: 'vertical',
-										align: 'right',
-										verticalAlign: 'middle',
-										borderWidth: 0
-								},
+		plotOptions: {
+		// series: {
+		//     compare: 'percent'
+		// }
+			bar: {
+				dataLabels: {
+					enabled: true
+				}
+			}
+		},
 
-						plotOptions: {
-								// series: {
-								//     compare: 'percent'
-								// }
-								 bar: {
-										dataLabels: {
-												enabled: true
-										}
-								}
+		tooltip: {
+			pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
+			valueDecimals: 2
+		},
 
-						},
+		series: seriesOptions
+	});
+};
 
-						tooltip: {
-								pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
-								valueDecimals: 2
-						},
+var updateChannelShow = function(data){
+	channel = $.extend(channel, data.channel);
+	setFields(data);
+	initData(data);
+}
 
-						series: seriesOptions
-				});
-		};
+var updateChannelMultiShow = function(data){
+	channel = $.extend(channel, data.channel);
+	setFields(data);
 
-$(function () {
-	params = getUrlParameter();
-	validateParams();
+	var template = $('<iframe src="show.html" width="100%" height="400px" style="border: 0px"></iframe>');
+	var params_clone = params;
+	delete params_clone.types;
+	delete params_clone.fields;
 
-	//Fetch channel information
-	$.getJSON( serverURL+params.channelID+"/feeds.json?results=0&api_key="+params.api_key,    function (data) {
+	for (fieldi in channel.data){
+		var field = channel.data[fieldi];
+		var $iframe = $(template).clone();
+		var src = "show.html?"+$.param( $.extend(params_clone, {fields:field.field, types:field.type} ) );
+		$iframe.attr("src", src);
+		$('#container').append($iframe);
+	}
+}
 
-			channel = $.extend(channel, data.channel);
-			setFields(data);
-			initData(data);
+function getChannelInfo(callback){
+	$.getJSON( serverURL+params.channelID+"/feeds.json?results=0&api_key="+params.api_key, callback).fail(function() {
+	    alert("Invalid parametors");
+	});
 
-	}).fail(function() {
-    alert("Invalid parametors");
-  });
-
-
-});
+}
 
 function initData(object){
 	console.log("Loading...");
@@ -184,42 +194,45 @@ function initData(object){
 
 	$.each(channel.list, function (i, name) {
 
-			var option = {results : config.results, api_key : params.api_key}
-			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
+		var option = config;//{results : config.results, api_key : params.api_key}
+		var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
 
-			$.getJSON(fetch_url,    function (data) {
+		$.getJSON(fetch_url,    function (data) {
 
-					var list = []
-					if (data.feeds){
-							$.each(data.feeds, function (index, record) {
-									if(record[fieldTxt+name]){
-										var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
-										list.push( [parsedData.datetime, parsedData.value ] )
-									};
-							});
-					}
+				var list = []
+				if (data.feeds){
+						$.each(data.feeds, function (index, record) {
+								if(record[fieldTxt+name]){
+									var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
+									list.push( [parsedData.datetime, parsedData.value ] )
+								};
+						});
+				}
 
-					// Store last upadted
-					if (list.length>0){
-						channel.data[name].updated_at = channel.updated_at;
-						channel.updated_at = data.channel.updated_at;
-					}
+				// Store last upadted
+				if (list.length>0){
+					channel.data[name].updated_at = channel.updated_at;
+					channel.updated_at = data.channel.updated_at;
+				}
 
-					isLoading[name] =  false;
-					seriesOptions[i] = {
-							name: channel.data[name].name,
-							data: list
-					};
+				isLoading[name] =  false;
 
-					// As we're loading the data asynchronously, we don't know what order it will arrive. So
-					// we keep a counter and create the chart when all the data is loaded.
-					seriesCounter += 1;
+				seriesOptions[i] = {
+						name: channel.data[name].name,
+						data: list,
+						type: ( validTypes.indexOf(channel.data[name].type) > -1  ? channel.data[name].type : 'line' ),
+						step: channel.data[name].type=="step" ? 'left' : false
+				};
 
-					if (seriesCounter === channel.names.length) {
-							createChart();
-					}
+				// As we're loading the data asynchronously, we don't know what order it will arrive. So
+				// we keep a counter and create the chart when all the data is loaded.
+				seriesCounter += 1;
 
-			});
+				if (seriesCounter === channel.names.length) {
+						createChart();
+				}
+
+		});
 	});
 	return;
 }
@@ -259,6 +272,7 @@ function validateParams(){
 	}
 	if ("days" in datas && Number(datas.days) ){
 		config.days = Number(datas.days);
+		delete config.results;
 	}
 
 	config.dynamic = ("dynamic" in datas && datas.dynamic=='true');
@@ -270,27 +284,41 @@ function getLogNames(object){
 	var names = [];
 	if (object.channel){
 		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
-				channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
+			channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
 		}
 	}
 	return names;
 }
 
 function setFields(object){
+
+	//changes params
+	params.types = decodeURIComponent(params.types).split(',');
+	if (params.fields){
+		params.fields = decodeURIComponent(params.fields).split(',');
+	}	
+	console.log(params.fields);
+
 	channel.list = [];
+	var fieldIndex = 0;
 	if (object.channel){
 		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
 
+			if ( ( params.fields && params.fields.indexOf(fieldTxt+i)>-1) || !params.fields){
 				channel.data[i] = {
 					i			:	i,
 					field	: fieldTxt+i,
 					label	: object.channel[fieldTxt+i],
-					name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i]
+					name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i],
+					type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
 				}
 
 				channel.fields.push(fieldTxt+i);
 				channel.list.push(i);
 				channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
+				fieldIndex++;
+			}
+				
 		}
 	}
 }
@@ -300,7 +328,7 @@ function getLogNameFromUrl() {
 }
 
 function getReduce() {
-		return getUrlParameter("average")=="true";
+	return getUrlParameter("average")=="true";
 }
 
 function parseDataLog(data){
@@ -313,36 +341,36 @@ function parseDataLog(data){
 
 function handleLoaded(series){
 
-		 if (config.dynamic) {
-
-			 // push data every 5 seconds
-				 setInterval(function() {
-
-					 var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
-					 var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
-
-					 $.getJSON(fetch_url,    function (data) {
-
-						 if (data.feeds){
-							 $.each(data.feeds, function (index, record) {
-
-								 $.each(channel.list, function (i, name) {
-
-									 if(record[fieldTxt+name]){
-										 var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
-										 series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
-									 };
-
-									 channel.data[name].updated_at = data.channel.updated_at;
-									 channel.updated_at = data.channel.updated_at;
-								 });
-
-							 });
-						 }
-
-					 });
-				 }, 5000);
-
-		 }
+	if (!config.dynamic) {
 		return;
+	}
+
+	// push data every 5 seconds
+	setInterval(function() {
+
+		var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
+		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
+
+		$.getJSON(fetch_url,    function (data) {
+
+			if (data.feeds){
+				$.each(data.feeds, function (index, record) {
+
+					$.each(channel.list, function (i, name) {
+
+						if(record.created_at != channel.updated_at && record[fieldTxt+name]){
+							var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
+							series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
+						};
+
+						channel.data[name].updated_at = data.channel.updated_at;
+						channel.updated_at = data.channel.updated_at;
+					});
+
+				});
+			}
+
+		});
+	}, 5000);
+
 }

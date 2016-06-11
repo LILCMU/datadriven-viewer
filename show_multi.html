@@ -15,20 +15,19 @@
     </style>
 </head>
 <body>
-    <div id="container" style=" min-width: 310px" class="infobox"></div>
+    <div id="container">
+    </div>
+    
     <!-- Preloader -->
     <script src="bootswatch/bower_components/jquery/dist/jquery.min.js"></script>
   	<script src="bootswatch/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-    <script src="highstock.js"></script>
-    <script src="exporting.js"></script>
-    <script src="export-csv.js"></script>
     <script type="text/javascript" src="script.js"></script>
     <script>
         $(function () {
             params = getUrlParameter();
-            validateParams();
+            $("#iframe").attr("src","show.html"+window.location.search);
             //Fetch channel information
-            getChannelInfo(updateChannelShow);
+            getChannelInfo(updateChannelMultiShow);
 
         });
     </script>
