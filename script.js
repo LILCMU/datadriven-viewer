@@ -198,10 +198,9 @@ createChart = function () {
 				}
 
 				// Store last upadted
-				if (list.length>0){
-					channel.data[name].updated_at = channel.updated_at;
-					channel.updated_at = data.channel.updated_at;
-				}
+				channel.data[name].last_entry_id = data.channel.last_entry_id
+				channel.data[name].updated_at = data.channel.updated_at;
+				channel.updated_at = data.channel.updated_at;
 
 				isLoading[name] =  false;
 
@@ -346,9 +345,10 @@ createChart = function () {
 
 						$.each(channel.list, function (i, name) {
 
-							if(record.created_at != channel.updated_at && record[fieldTxt+name]){
+							if(record.entry_id > channel.data[name].last_entry_id && record[fieldTxt+name]){
 								var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
 								series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
+								channel.data[name].last_entry_id = record.entry_id;
 							};
 
 							channel.data[name].updated_at = data.channel.updated_at;
