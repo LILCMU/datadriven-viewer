@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Data-Driven Viewer</title>
-  <link href="bootswatch/paper/bootstrap.min.css" rel="stylesheet">
+  <link href="bower_components/bootswatch/paper/bootstrap.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Marutpong Chailangka">
   <style>
@@ -17,11 +17,12 @@
 <body>
   <div id="container" style=" min-width: 310px" class="infobox"></div>
   <!-- Preloader -->
-  <script src="bootswatch/bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="bootswatch/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-  <script src="highstock.js"></script>
-  <script src="exporting.js"></script>
-  <script src="export-csv.js"></script>
+  <script src="bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="bower_components/highcharts/highstock.js"></script>
+  <script src="bower_components/highcharts/modules/exporting.js"></script>
+  <script src="bower_components/highcharts-export-csv/export-csv.js"></script>
+  <script src="bower_components/highcharts/modules/no-data-to-display.js"></script>
   <script type="text/javascript" src="script.js"></script>
   <script>
   $(function () {

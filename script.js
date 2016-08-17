@@ -8,24 +8,25 @@ var channel = {fields:[],names:[],data:{}};
 var validTypes = ["line","column","spline"];
 
 var isLoading = {};
-var seriesOptions = [],
-seriesCounter = 0,
+var seriesOptions = [];
+var seriesCounter = 0;
+var chart = null;
 
 // create the chart when all data is loaded
-createChart = function () {
+var createChart = function (seriesOptions) {
 	var channelID = Number(getUrlParameter("channelID"));
-	$('#container').highcharts('StockChart', {
+	chart = $('#container').highcharts('StockChart', {
 		chart : {
 			events : {
 				load : function () {
 					var series2 = this.series.slice(0,this.series.length-1);
-					handleLoaded(series2);
+					if (seriesOptions) { handleLoaded(series2) };
 				}
 			}
 		},
 
 		title: {
-			text: channel.name
+			text: (channel.name || '')
 		},
 		rangeSelector: {
 			buttons: [
@@ -98,18 +99,26 @@ createChart = function () {
 				}
 			},
 
+			credits: {
+      	enabled: true, href: 'https://data.learninginventions.org/', text: 'data.learninginventions.org'
+      },
+
 			tooltip: {
 				pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b><br/>',
 				valueDecimals: 2
 			},
 
-			series: seriesOptions
+			series: (seriesOptions ? seriesOptions : [])
 		});
+
+		chart = $('#container').highcharts();
+
 	};
 
 	var updateChannelShow = function(data){
 		channel = $.extend(channel, data.channel);
 		setFields(data);
+		createChart();
 		initData(data);
 	}
 
@@ -133,52 +142,14 @@ createChart = function () {
 
 	function getChannelInfo(callback){
 		$.getJSON( serverURL+params.channelID+"/feeds.json?results=0&api_key="+params.api_key, callback).fail(function() {
-			alert("Invalid parametors");
+			alert("Invalid parametors or Private Channel");
 		});
 
 	}
 
 	function initData(object){
 		console.log("Loading...");
-		/*
-		// Fetch entire channel
-		var fetch_url = serverURL+params.channelID+'/feeds.json?api_key='+params.api_key+'&results='+config.results;
-
-		$.getJSON(fetch_url,    function (data) {
-			console.log(data);
-			var list = {};
-
-
-			for (field of channel.fields) {
-				list[field] = [];
-			}
-
-			if (data.feeds){
-				$.each(data.feeds, function (index, record) {
-
-					for (field of channel.fields) {
-						if(record[field]){
-							var parsedData = parseDataLog({ datetime:record.created_at,value:record[field] });
-							list[field].push( [parsedData.datetime, parsedData.value ] )
-						};
-					}
-
-				});
-			}
-
-			isLoading[name] =  false;
-
-			for (var index in channel.fields) {
-				seriesOptions[index] = {
-					name: channel.names[index],
-					data: list[channel.fields[index]]
-				};
-			}
-			createChart();
-
-		});
-		*/
-
+		chart.showLoading();
 
 		$.each(channel.list, function (i, name) {
 
@@ -211,154 +182,159 @@ createChart = function () {
 					step: channel.data[name].type=="step" ? 'left' : false
 				};
 
+			})
+			.always(function() {
 				// As we're loading the data asynchronously, we don't know what order it will arrive. So
 				// we keep a counter and create the chart when all the data is loaded.
 				seriesCounter += 1;
 
-				if (seriesCounter === channel.names.length) {
-					createChart();
+				if (seriesCounter === channel.list.length) {
+					createChart(seriesOptions);
+					chart.hideLoading();
 				}
-
-			});
+		  });;
 		});
 		return;
 	}
 
-	function getUrlParameter(sParam) {
-		var sPageURL = window.location.search.substring(1);
-		var sURLVariables = sPageURL.split('&');
-		var datas = {};
-		for (var i = 0; i < sURLVariables.length; i++)
+function getUrlParameter(sParam) {
+	var sPageURL = window.location.search.substring(1);
+	var sURLVariables = sPageURL.split('&');
+	var datas = {};
+	for (var i = 0; i < sURLVariables.length; i++)
+	{
+		var sParameterName = sURLVariables[i].split('=');
+		datas[sParameterName[0]] = sParameterName[1];
+		if (sParameterName[0] == sParam)
 		{
-			var sParameterName = sURLVariables[i].split('=');
-			datas[sParameterName[0]] = sParameterName[1];
-			if (sParameterName[0] == sParam)
-			{
-				return sParameterName[1];
+			return sParameterName[1];
+		}
+	}
+	return datas;
+}
+
+function validateParams(){
+	var datas = getUrlParameter();
+	if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
+		alert("Invalid Channel ID");
+		return false;
+	} else if ( datas.api_key && datas.api_key.length != 16 ) {
+		alert("Invalid Read API Key");
+		return false;
+	}
+
+	config.api_key = ("api_key" in datas) ? datas.api_key : '';
+
+	if ("results" in datas && Number(datas.results) ){
+		config.results = Number(datas.results);
+	}
+
+	if ("days" in datas && Number(datas.days) ){
+		config.days = Number(datas.days);
+		delete config.results;
+	}
+
+	config.dynamic = ("dynamic" in datas && datas.dynamic=='true');
+
+	return true;
+}
+
+function getLogNames(object){
+	var names = [];
+	if (object.channel){
+		for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
+			channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
+		}
+	}
+	return names;
+}
+
+function setFields(object){
+	//changes params
+	params.types = decodeURIComponent(params.types).split(',');
+	if (params.fields){
+		params.fields = decodeURIComponent(params.fields).split(',');
+	}
+
+
+	channel.list = [];
+	var fieldIndex = 0;
+	if (!object.channel) return;
+
+	for (var i=1 ; i<=8 ; i++){
+
+		var fieldString = fieldTxt+i;
+		if ( ! (fieldString in object.channel) ){
+			continue;
+		}
+
+		if ( ( params.fields && params.fields.indexOf(fieldString)>-1) || !params.fields){
+			channel.data[i] = {
+				i			:	i,
+				field	: fieldString,
+				label	: object.channel[fieldString],
+				name	: fieldTxt+i+ ':' +  object.channel[fieldString],
+				type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
 			}
+
+			channel.fields.push(fieldString);
+			channel.list.push(i);
+			channel.names.push( fieldString+ ':' +  object.channel[fieldString]);
+			fieldIndex++;
 		}
-		return datas;
+
+	}
+}
+
+function getLogNameFromUrl() {
+	return getUrlParameter("name").split(",");
+}
+
+function getReduce() {
+	return getUrlParameter("average")=="true";
+}
+
+function parseDataLog(data){
+	var date = new Date(data.datetime);
+	var localdate = date-1*date.getTimezoneOffset()*60*1000;
+	data.datetime = localdate;
+	data.value    = Number(data.value);
+	return data;
+}
+
+function handleLoaded(series){
+
+	if (!config.dynamic) {
+		return;
 	}
 
-	function validateParams(){
-		var datas = getUrlParameter();
-		if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
-			alert("Invalid Channel ID");
-			return false;
-		} else if ( datas.api_key && datas.api_key.length != 16 ) {
-			alert("Invalid Read API Key");
-			return false;
-		}
+	// push data every 5 seconds
+	setInterval(function() {
 
-		if (!"api_key" in datas){
-			datas.api_key = "";
-		}
+		var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
+		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
 
-		if ("results" in datas && Number(datas.results) ){
-			config.results = Number(datas.results);
-		}
-		if ("days" in datas && Number(datas.days) ){
-			config.days = Number(datas.days);
-			delete config.results;
-		}
+		$.getJSON(fetch_url,    function (data) {
 
-		config.dynamic = ("dynamic" in datas && datas.dynamic=='true');
+			if (data.feeds){
+				$.each(data.feeds, function (index, record) {
 
-		return true;
-	}
+					$.each(channel.list, function (i, name) {
 
-	function getLogNames(object){
-		var names = [];
-		if (object.channel){
-			for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
-				channel.names.push( fieldTxt+i+ ':' + object.channel[fieldTxt+i] );
-			}
-		}
-		return names;
-	}
+						if(record.entry_id > channel.data[name].last_entry_id && record[fieldTxt+name]){
+							var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
+							series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
+							channel.data[name].last_entry_id = record.entry_id;
+						};
 
-	function setFields(object){
-
-		//changes params
-		params.types = decodeURIComponent(params.types).split(',');
-		if (params.fields){
-			params.fields = decodeURIComponent(params.fields).split(',');
-		}
-		console.log(params.fields);
-
-		channel.list = [];
-		var fieldIndex = 0;
-		if (object.channel){
-			for (var i=1 ; i<=8 && fieldTxt+i in object.channel ; i++){
-
-				if ( ( params.fields && params.fields.indexOf(fieldTxt+i)>-1) || !params.fields){
-					channel.data[i] = {
-						i			:	i,
-						field	: fieldTxt+i,
-						label	: object.channel[fieldTxt+i],
-						name	: fieldTxt+i+ ':' +  object.channel[fieldTxt+i],
-						type 	: ( fieldIndex in params.types ? params.types[fieldIndex] : '' )
-					}
-
-					channel.fields.push(fieldTxt+i);
-					channel.list.push(i);
-					channel.names.push( fieldTxt+i+ ':' +  object.channel[fieldTxt+i]);
-					fieldIndex++;
-				}
-
-			}
-		}
-	}
-
-	function getLogNameFromUrl() {
-		return getUrlParameter("name").split(",");
-	}
-
-	function getReduce() {
-		return getUrlParameter("average")=="true";
-	}
-
-	function parseDataLog(data){
-		var date = new Date(data.datetime);
-		var localdate = date-1*date.getTimezoneOffset()*60*1000;
-		data.datetime = localdate;
-		data.value    = Number(data.value);
-		return data;
-	}
-
-	function handleLoaded(series){
-
-		if (!config.dynamic) {
-			return;
-		}
-
-		// push data every 5 seconds
-		setInterval(function() {
-
-			var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
-			var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
-
-			$.getJSON(fetch_url,    function (data) {
-
-				if (data.feeds){
-					$.each(data.feeds, function (index, record) {
-
-						$.each(channel.list, function (i, name) {
-
-							if(record.entry_id > channel.data[name].last_entry_id && record[fieldTxt+name]){
-								var parsedData = parseDataLog({ datetime:record.created_at,value:record[fieldTxt+name] });
-								series[i].addPoint([parsedData.datetime,parsedData.value], true, true);
-								channel.data[name].last_entry_id = record.entry_id;
-							};
-
-							channel.data[name].updated_at = data.channel.updated_at;
-							channel.updated_at = data.channel.updated_at;
-						});
-
+						channel.data[name].updated_at = data.channel.updated_at;
+						channel.updated_at = data.channel.updated_at;
 					});
-				}
 
-			});
-		}, 5000);
+				});
+			}
 
-	}
+		});
+	}, 5000);
+
+}

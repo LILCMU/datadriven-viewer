@@ -5,7 +5,7 @@
 	<title>Data-Driven Viewer</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="author" content="Marutpong Chailangka">
-	<link href="bootswatch/paper/bootstrap.min.css" rel="stylesheet">
+	<link href="bower_components/bootswatch/paper/bootstrap.min.css" rel="stylesheet">
 	<style>
 	.top-buffer { margin-top:20px; }
 	input.ng-invalid {
@@ -25,7 +25,7 @@
 				<h2 class="text-primary">Data-Driven Viewer</h2>
 			</div>
 		</div>
-		<form class="bs-component" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form">
+		<form class="bs-component form-horizontal" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form">
 			<div class="row">
 				<div class="col-md-6 col-md-6 col-md-offset-3 col-md-offset-3">
 
@@ -42,7 +42,7 @@
 						<div class="form-group">
 							<label for="inputChannelID" class="col-sm-3 control-label">Channel ID</label>
 							<div class="col-sm-9">
-								<input ng-model="data.channelID" ng-change="ccc()" type="number" min="1" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID" required>
+								<input ng-model="data.channelID" type="number" min="1" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID" required>
 							</div>
 						</div>
 
@@ -117,117 +117,151 @@
 					</div>
 
 					<!-- <div class="row block">
-						<div class="form-group">
-							<div class="col-sm-6 col-sm-6">
-								<div class="checkbox">
-									<label>
+					<div class="form-group">
+										<div class="col-sm-6 col-sm-6">
+										<div class="checkbox">
+										<label>
 										<input type="checkbox" name="average"><span class="checkbox-material"><span class="check"></span></span> Average sensor values by
 									</label>
 								</div>
 							</div>
 							<div class="col-sm-6 col-sm-6">
-								<select data-placeholder="choose log" class="form-control " name="by" style="height:36px;">
-									<option value="10minute">10minute</option>
-									<option value="hour">hour</option>
-									<option value="day">day</option>
-									<option value="month">month</option>
-								</select>
-							</div>
-						</div>
+							<select data-placeholder="choose log" class="form-control " name="by" style="height:36px;">
+							<option value="10minute">10minute</option>
+							<option value="hour">hour</option>
+							<option value="day">day</option>
+							<option value="month">month</option>
+						</select>
+					</div>
+					</div>
 					</div>
 
 					<div class="row" style="display:none;">
-						<div class="form-group">
-							<div class="col-sm-6">
-								<div class="checkbox">
-									<label>
-										<input type="checkbox" name="range"><span class="checkbox-material"><span class="check"></span></span> Range
-									</label>
-								</div>
-							</div>
-							<div class="col-sm-6">
-								<select data-placeholder="choose log" class="form-control " name="date_range" style="height:36px;">
-									<option value="10minute">10minute</option>
-									<option value="hour">hour</option>
-									<option value="day">day</option>
-									<option value="month">month</option>
-								</select>
-							</div>
-						</div>
+					<div class="form-group">
+					<div class="col-sm-6">
+					<div class="checkbox">
+					<label>
+					<input type="checkbox" name="range"><span class="checkbox-material"><span class="check"></span></span> Range
+					</label>
+					</div>
+					</div>
+					<div class="col-sm-6">
+					<select data-placeholder="choose log" class="form-control " name="date_range" style="height:36px;">
+					<option value="10minute">10minute</option>
+					<option value="hour">hour</option>
+					<option value="day">day</option>
+					<option value="month">month</option>
+					</select>
+					</div>
+					</div>
 					</div>
 					<div class="form-group">
-						<div class="col-sm-10 col-sm-offset-4">
-							<button type="submit" class="btn btn-primary">Submit</button>
-						</div>
+					<div class="col-sm-10 col-sm-offset-4">
+					<button type="submit" class="btn btn-primary">Submit</button>
+					</div>
 					</div> -->
 
-				</div>
+			</div>
 			</div>
 			<div class="row text-center">
 				<div class="col-sm-1 col-sm-offset-5 block">
 					<button class="btn btn-success" type="submit" id="btn_submit"><i class="mdi-navigation-arrow-forward"></i> Sumbit</button>
 				</div>
 			</div>
+
+			<hr>
+			<div class="row" ng-show="embeded.src">
+				<div class="col-md-6 col-md-offset-3 text-center">
+					<h5>Iframe/Embeded</h5>
+
+					<div class="row">
+						<div class="col-md-6">
+							<div class="form-group">
+						    <label class="col-sm-3 control-label" for="inputWidth">Width</label>
+						    <div class="col-sm-9">
+						      <input id="inputWidth" ng-model="embeded.width" ng-change="updateEmbededCode()" type="number" min="1" class="form-control"  placeholder="Iframe Width">
+						    </div>
+						  </div>
+						</div>
+
+						<div class="col-md-6">
+							<div class="form-group">
+								<label class="col-sm-3 control-label" for="inputHeight">Height</label>
+								<div class="col-sm-9">
+									<input id="inputHeight" ng-model="embeded.height" ng-change="updateEmbededCode()" type="number" min="1" class="form-control"  placeholder="Iframe Height">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<div class="well" style="word-wrap: break-word;">
+						{{ embeded.html }}
+					</div>
+				</div>
+			</div>
 		</form>
 
 	</div>
 
-	<script src="bootswatch/bower_components/jquery/dist/jquery.min.js"></script>
-	<script src="bootswatch/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-	<script src="angular.min.js"></script>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="script.js"></script>
 
-	<script>
-	var serverURL = "https://data.learninginventions.org/channels/";
-	$(function() {
-		$('.container').height($(window).height());
-	});
+<script>
+var serverURL = "https://data.learninginventions.org/channels/";
+var viewerURL = "https://lilcmu.github.io/datadriven-viewer/";
+var form_object = $('#select_data_form');
 
-	function on_submit(event){
+$(function() {
+	$('.container').height($(window).height());
+});
 
-		if (!event.id){
-			event.preventDefault();
-		};
-		//var data = $(event.target).serialize();
-		var data = $('#select_data_form').serialize();
-		var url = $(event.target).attr('action');
-		var datas = data.split('&');
-		var list = [];
-		var is_avg = $('[name=average]').prop( "checked" );
-		var by = $('[name=by]').val();
-		var is_range = $('[name=range]').prop( "checked" );
-		var date_range = $('[name=date_range]').val();
+function on_submit(event){
 
-		var datas = {};
-		$("#select_data_form").serializeArray().map(function(x){datas[x.name] = x.value;});
+	if (!event.id){
+		event.preventDefault();
+	};
+	//var data = $(event.target).serialize();
+	var data = $('#select_data_form').serialize();
+	var url = $(event.target).attr('action');
+	var datas = data.split('&');
+	var list = [];
+	var is_avg = $('[name=average]').prop( "checked" );
+	var by = $('[name=by]').val();
+	var is_range = $('[name=range]').prop( "checked" );
+	var date_range = $('[name=date_range]').val();
 
-		if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
-			alert("Invalid Channel ID");
-			return false;
-		} else if ( datas.api_key && datas.api_key.length != 16 ) {
-			alert("Invalid Read API Key");
-			return false;
-		} else {
-			datas.dynamic = $('[name=dynamic]').prop( "checked" );
-			var redirect = url+"?"+$.param(datas);//+"&average="+is_avg+"&by="+by+"&range="+is_range+"&date_range="+date_range;
-			window.location.href = redirect;
-		}
+	var datas = {};
+	$("#select_data_form").serializeArray().map(function(x){datas[x.name] = x.value;});
+
+	if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
+		alert("Invalid Channel ID");
+		return false;
+	} else if ( datas.api_key && datas.api_key.length != 16 ) {
+		alert("Invalid Read API Key");
+		return false;
+	} else {
+		datas.dynamic = $('[name=dynamic]').prop( "checked" );
+		var redirect = url+"?"+$.param(datas);//+"&average="+is_avg+"&by="+by+"&range="+is_range+"&date_range="+date_range;
+		window.location.href = redirect;
 	}
-	</script>
+}
+</script>
 
-	<script>
-	var app = angular.module("ddvApp", []);
+<script>
+var app = angular.module("ddvApp", []);
 
-	app.controller("ddvCtrl", function($scope,$http) {
-		$scope.data = {dynamic: true, display:'single', action: "show.html"};
-		$scope.channel = {};
-		$scope.fields = {};
-		$scope.types = ["line","column","spline","step"];
+app.controller("ddvCtrl", function($scope,$http,$httpParamSerializer) {
+	$scope.data = {dynamic: true, display:'single'};
+	$scope.form = {action: "show.html"};
+	$scope.channel = {};
+	$scope.fields = {};
+	$scope.types = ["line","column","spline","step"];
+	$scope.embeded = {src:null, width:800, height:600, default_width:800, default_height:600};
 
-		$scope.ccc = function(){
-			// console.log($scope.data.channelID);
-		}
-
-		$scope.$watch("data.channelID",
+	$scope.$watch("data.channelID",
 		function handleChange( newValue, oldValue ) {
 
 			if(angular.isNumber(newValue)){
@@ -239,18 +273,46 @@
 		}
 	);
 
-	$scope.$watch("data.display",
-	function handleChange( newValue, oldValue ) {
-		if(newValue=="separate"){
-			$('#select_data_form').attr('action','show_multi.html');
-		} else {
-			$('#select_data_form').attr('action',$scope.data.action);
-		}
+$scope.$watch("data.api_key",
+function handleChange( newValue, oldValue ) {
+
+	if(newValue && newValue.length==16){
+		$scope.getChannel();
+	} else {
+		$scope.channel = {}
+		$scope.updateFields()
 	}
+}, true
 );
 
+$scope.$watch("data.display",
+function handleChange( newValue, oldValue ) {
+	if(newValue=="separate"){
+		$('#select_data_form').attr('action','show_multi.html');
+	} else {
+		$('#select_data_form').attr('action',$scope.form.action);
+	}
+});
+
+$scope.$watch("data",
+function handleChange( newValue, oldValue ) {
+	$scope.updateEmbededCode();
+}, true);
+
+
+$scope.updateEmbededCode = function(){
+	if (!$scope.data.channelID) {
+		$scope.embeded.html = null;
+		$scope.embeded.src = null;
+		return;
+	}
+
+	$scope.embeded.src 	= viewerURL + $scope.form.action +'?' + $httpParamSerializer($scope.data);
+	$scope.embeded.html = '<iframe src="'+$scope.embeded.src+'" width="'+ ($scope.embeded.width || $scope.embeded.default_width) +'" height="'+ ($scope.embeded.height || $scope.embeded.default_height) +'" frameborder="0">';
+
+}
+
 $scope.updateDataSelected = function() {
-	console.log("ok");
 	var listField=[];
 	var listType=[];
 
@@ -283,10 +345,19 @@ $scope.getChannel = function(){
 $scope.updateFields = function(){
 	$scope.fields = {};
 
-	for (var i = 1 ; (i <= 8) && ("field"+i in $scope.channel); i++) {
-		// $scope.fields.push("field"+i);
-		$scope.fields["field"+i] = {name:"field"+i, selected:true};
+	console.log($scope.channel);
+
+	for (var i = 1 ; (i <= 8); i++) {
+		console.log(i);
+		if ((fieldTxt+i) in $scope.channel){
+			console.log('\tfound');
+			$scope.fields[(fieldTxt+i)] = {name:(fieldTxt+i), selected:true};
+		}
+
 	}
+	console.log($scope.fields);
+
+	console.log($(form_object).serialize());
 }
 
 $scope.isEmpty = function () {

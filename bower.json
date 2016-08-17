@@ -1,0 +1,27 @@
+{
+  "name": "datadriven-viewer",
+  "homepage": "https://lilcmu.github.io/datadriven-viewer/",
+  "authors": [
+    "marutpong <marutpong08@gmail.com>"
+  ],
+  "description": "bower init",
+  "main": "index.html",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-chosen": "^1.0.1",
+    "bootstrap-daterangepicker": "^2.1.24",
+    "bootswatch": "^3.3.7",
+    "highcharts": "^4.2.6",
+    "angular": "^1.5.8",
+    "highcharts-export-csv": "export-csv#*",
+    "bower": "*",
+    "underscore": "^1.8.3"
+  }
+}
