@@ -1,124 +1,129 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<meta charset="utf-8">
-	<title>Data-Driven Viewer</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="author" content="Marutpong Chailangka">
-	<link href="bower_components/bootswatch/paper/bootstrap.min.css" rel="stylesheet">
-	<style>
-	.top-buffer { margin-top:20px; }
-	input.ng-invalid {
-		border-bottom: none;
-		-webkit-box-shadow: inset 0 -2px 0 #e51c23;
-		box-shadow: inset 0 -2px 0 #e51c23;
-	}
-	input.ng-valid {
-		/*background-color:lightgreen;*/
-	}
-	</style>
-</head>
-<body >
-	<div ng-app="ddvApp" ng-controller="ddvCtrl" class="container">
-		<div class="row">
-			<div class="col-md-6 col-md-offset-3 text-center">
-				<h2 class="text-primary">Data-Driven Viewer</h2>
-			</div>
-		</div>
+    <head>
+        <meta charset="utf-8">
+        <title>Data-Driven Viewer</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="author" content="Marutpong Chailangka">
+        <link href="bower_components/bootswatch/paper/bootstrap.min.css" rel="stylesheet">
+        <style>
+            .top-buffer {
+                margin-top: 20px;
+            }
+            input.ng-invalid {
+                border-bottom: none;
+                -webkit-box-shadow: inset 0 -2px 0 #e51c23;
+                box-shadow: inset 0 -2px 0 #e51c23;
+            }
+            input.ng-valid {
+                /*background-color:lightgreen;*/
+            }
 
-		<form class="bs-component" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form" target="_blank">
+        </style>
+    </head>
+    <body >
+        <div ng-app="ddvApp" ng-controller="ddvCtrl" class="container">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3 text-center">
+                    <h2 class="text-primary">Data-Driven Viewer</h2>
+                </div>
+            </div>
 
-			<div class="row">
-				<div class="col-md-6 col-md-6 col-md-offset-3 col-md-offset-3">
+            <form class="bs-component" action="show.html" method="GET" onsubmit="on_submit(event)" id="select_data_form" target="_blank">
 
-					<div class="row block">
+                <div class="row">
+                    <div class="col-md-6 col-md-6 col-md-offset-3 col-md-offset-3">
 
-						<div class="form-group hidden">
-							<div class="col-sm-12">
-								<select data-placeholder="choose data" multiple class="chosen-select" tabindex="8" name="name" id="chooser">
-									<option value=""></option>
-								</select>
-							</div>
-						</div>
+                        <div class="row block">
 
-						<div class="form-group">
-							<label for="inputChannelID" class="col-sm-3 control-label">Channel ID</label>
-							<div class="col-sm-9">
-								<input ng-model="data.channelID" type="number" min="1" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID" required>
-							</div>
-						</div>
+                            <div class="form-group hidden">
+                                <div class="col-sm-12">
+                                    <select data-placeholder="choose data" multiple class="chosen-select" tabindex="8" name="name" id="chooser">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                            </div>
 
-						<div class="form-group">
-							<label for="inputReadAPIKey" class="col-sm-3 control-label">Read API Key</label>
-							<div class="col-sm-9">
-								<input ng-model="data.api_key" type="text" minlength="16" maxlength="16" class="form-control" name="api_key" id="inputReadAPIKey" placeholder="Read API Key">
-							</div>
-						</div>
+                            <div class="form-group">
+                                <label for="inputChannelID" class="col-sm-3 control-label">Channel ID</label>
+                                <div class="col-sm-9">
+                                    <input ng-model="data.channelID" type="number" min="1" class="form-control" name="channelID" id="inputChannelID" placeholder="Channel ID" required>
+                                </div>
+                            </div>
 
-						<div class="form-group">
-							<label for="inputresults" class="col-sm-3 control-label">Result</label>
-							<div class="col-sm-5">
-								<input ng-model="data.results" type="number" min="1" class="form-control" name="results" id="inputresults" placeholder="Points">
-							</div>
-							<div class="col-sm-4">
-								<input ng-model="data.days" type="number" min="1" class="form-control" name="days" id="inputdays" placeholder="Days">
-							</div>
-						</div>
+                            <div class="form-group">
+                                <label for="inputReadAPIKey" class="col-sm-3 control-label">Read API Key</label>
+                                <div class="col-sm-9">
+                                    <input ng-model="data.api_key" type="text" minlength="16" maxlength="16" class="form-control" name="api_key" id="inputReadAPIKey" placeholder="Read API Key">
+                                </div>
+                            </div>
 
-						<div class="form-group">
-							<label for="inputPassword" class="col-sm-3 control-label"></label>
-							<div class="col-sm-9">
-								<div class="checkbox">
-									<label>
-										<input ng-model="data.dynamic" type="checkbox" name="dynamic" checked="checked"> Dynamic Update
-									</label>
-								</div>
-							</div>
-						</div>
+                            <div class="form-group">
+                                <label for="inputresults" class="col-sm-3 control-label">Result</label>
+                                <div class="col-sm-5">
+                                    <input ng-model="data.results" type="number" min="1" class="form-control" name="results" id="inputresults" placeholder="Points">
+                                </div>
+                                <div class="col-sm-4">
+                                    <input ng-model="data.days" type="number" min="1" class="form-control" name="days" id="inputdays" placeholder="Days">
+                                </div>
+                            </div>
 
-						<div class="form-group">
-							<label class="col-sm-3 control-label">Display</label>
-							<div class="col-sm-9">
-								<div class="radio">
-									<label>
-										<input ng-model="data.display" type="radio" value="single">
-										Single View
-									</label>
-									<label>
-										<input ng-model="data.display" type="radio" value="separate">
-										Separate View
-									</label>
-								</div>
-							</div>
-						</div>
+                            <div class="form-group">
+                                <label for="inputPassword" class="col-sm-3 control-label"></label>
+                                <div class="col-sm-9">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input ng-model="data.dynamic" type="checkbox" name="dynamic" checked="checked">
+                                            Dynamic Update
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
-						<legend ng-hide="isEmpty()">Fields</legend>
-						<div ng-hide="isEmpty()" class="well" >
-							<div ng-repeat="x in fields" class="row">
-								<div class="col-sm-5">
-									<div class="checkbox">
-										<label>
-											<input ng-model="x.selected" ng-change="updateDataSelected()" type="checkbox">{{x.name}} {{channel[x.name]}}
-										</label>
-									</div>
-								</div>
-								<div class="col-sm-4 control-label hidden"></div>
-								<div class="col-sm-3">
-									<select ng-model="x.type" class="form-control" ng-change="updateDataSelected()">
-										<option value="">Display Type</option>
-										<option ng-repeat="x in types" value="{{x}}">{{x}}</option>
-									</select>
-								</div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Display</label>
+                                <div class="col-sm-9">
+                                    <div class="radio">
+                                        <label>
+                                            <input ng-model="data.display" type="radio" value="single">
+                                            Single View
+                                        </label>
+                                        <label>
+                                            <input ng-model="data.display" type="radio" value="separate">
+                                            Separate View
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
 
-							</div>
+                            <legend ng-hide="isEmpty()">Fields</legend>
+                            <div ng-hide="isEmpty()" class="well">
+                                <div ng-repeat="x in fields" class="row">
+                                    <div class="col-sm-5">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input ng-model="x.selected" ng-change="updateDataSelected()" type="checkbox">{{x.name}}
+                                                {{channel[x.name]}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 control-label hidden"></div>
+                                    <div class="col-sm-3">
+                                        <select ng-model="x.type" class="form-control" ng-change="updateDataSelected()">
+                                            <option value="">Display Type</option>
+                                            <option ng-repeat="x in types" value="{{x}}">{{x}}</option>
+                                        </select>
+                                    </div>
 
-							<input ng-model="data.types" type="hidden" name="types" value="">
-							<input ng-model="data.fields" type="hidden" name="fields" value="">
-						</div>
+                                </div>
 
-					</div>
+                                <input ng-model="data.types" type="hidden" name="types" value="">
+                                <input ng-model="data.fields" type="hidden" name="fields" value="">
+                            </div>
 
-					<!-- <div class="row block">
+                        </div>
+
+                        <!-- <div class="row block">
 					<div class="form-group">
 										<div class="col-sm-6 col-sm-6">
 										<div class="checkbox">
@@ -163,211 +168,230 @@
 					</div>
 					</div> -->
 
-			</div>
-			</div>
-			<div class="row text-center">
-				<div class="col-sm-1 col-sm-offset-5 block">
-					<button class="btn btn-success" type="submit" id="btn_submit"><i class="mdi-navigation-arrow-forward"></i> Sumbit</button>
-				</div>
-			</div>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-sm-1 col-sm-offset-5 block">
+                        <button class="btn btn-success" type="submit" id="btn_submit">
+                            <i class="mdi-navigation-arrow-forward"></i>
+                            Sumbit</button>
+                    </div>
+                </div>
 
-			<hr>
-			<div class="row" ng-show="embeded.src">
-				<div class="col-md-6 col-md-offset-3 text-center">
-					<h5>Iframe/Embeded</h5>
+                <hr>
+                <div class="row" ng-show="embeded.src">
+                    <div class="col-md-6 col-md-offset-3 text-center">
+                        <h5>Iframe/Embeded</h5>
 
-					<div class="row">
-						<div class="col-md-6">
-							<div class="form-group">
-						    <label class="col-sm-3 control-label" for="inputWidth">Width</label>
-						    <div class="col-sm-9">
-						      <input id="inputWidth" ng-model="embeded.width" ng-change="updateEmbededCode()" type="number" min="1" class="form-control"  placeholder="Iframe Width">
-						    </div>
-						  </div>
-						</div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="inputWidth">Width</label>
+                                    <div class="col-sm-9">
+                                        <input id="inputWidth" ng-model="embeded.width" ng-change="updateEmbededCode()" type="number" min="1" class="form-control" placeholder="Iframe Width">
+                                    </div>
+                                </div>
+                            </div>
 
-						<div class="col-md-6">
-							<div class="form-group">
-								<label class="col-sm-3 control-label" for="inputHeight">Height</label>
-								<div class="col-sm-9">
-									<input id="inputHeight" ng-model="embeded.height" ng-change="updateEmbededCode()" type="number" min="1" class="form-control"  placeholder="Iframe Height">
-								</div>
-							</div>
-						</div>
-					</div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label" for="inputHeight">Height</label>
+                                    <div class="col-sm-9">
+                                        <input id="inputHeight" ng-model="embeded.height" ng-change="updateEmbededCode()" type="number" min="1" class="form-control" placeholder="Iframe Height">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-					<br>
-					<div class="well" style="word-wrap: break-word;">
-						{{ embeded.html }}
-					</div>
-				</div>
-			</div>
-		</form>
+                        <br>
+                        <div class="well" style="word-wrap: break-word;">
+                            {{ embeded.html }}
+                        </div>
+                    </div>
+                </div>
+            </form>
 
-	</div>
+        </div>				
 
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
-<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
-<script src="bower_components/angular/angular.js"></script>
-<script src="script.js"></script>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="bower_components/angular/angular.js"></script>
+        <script src="script.js"></script>
 
-<script>
-var serverURL = "https://data.learninginventions.org/channels/";
-var viewerURL = "https://lilcmu.github.io/datadriven-viewer/";
-var form_object = $('#select_data_form');
+        <script>
+            var serverURL = "https://data.learninginventions.org/channels/";
+            var viewerURL = "https://lilcmu.github.io/datadriven-viewer/";
+            var form_object = $('#select_data_form');
 
-$(function() {
-	$('.container').height($(window).height());
-});
+            $(function() {
+                $('.container').height($(window).height());
+								params = getUrlParameter();
+								console.log(params);
+								if (validateParams()){
+									console.log('okok');
+									console.log(params.channelID);
+									$('#inputChannelID').val(params.channelID);
+						    }
+            });
 
-function on_submit(event){
+            function on_submit(event) {
 
-	if (!event.id){
-		event.preventDefault();
-	};
-	//var data = $(event.target).serialize();
-	var data = $('#select_data_form').serialize();
-	var url = $(event.target).attr('action');
-	var datas = data.split('&');
-	var list = [];
-	var is_avg = $('[name=average]').prop( "checked" );
-	var by = $('[name=by]').val();
-	var is_range = $('[name=range]').prop( "checked" );
-	var date_range = $('[name=date_range]').val();
+                if (!event.id) {
+                    event.preventDefault();
+                };
+                //var data = $(event.target).serialize();
+                var data = $('#select_data_form').serialize();
+                var url = $(event.target).attr('action');
+                var datas = data.split('&');
+                var list = [];
+                var is_avg = $('[name=average]').prop("checked");
+                var by = $('[name=by]').val();
+                var is_range = $('[name=range]').prop("checked");
+                var date_range = $('[name=date_range]').val();
 
-	var datas = {};
-	$("#select_data_form").serializeArray().map(function(x){datas[x.name] = x.value;});
+                var datas = {};
+                $("#select_data_form").serializeArray().map(function(x) {
+                    datas[x.name] = x.value;
+                });
 
-	if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
-		alert("Invalid Channel ID");
-		return false;
-	} else if ( datas.api_key && datas.api_key.length != 16 ) {
-		alert("Invalid Read API Key");
-		return false;
-	} else {
-		datas.dynamic = $('[name=dynamic]').prop( "checked" );
-		var redirect = url+"?"+$.param(datas);//+"&average="+is_avg+"&by="+by+"&range="+is_range+"&date_range="+date_range;
-		window.location.href = redirect;
-	}
-}
-</script>
+                if (!Number(datas.channelID) || Number(datas.channelID) < 1) {
+                    alert("Invalid Channel ID");
+                    return false;
+                } else if (datas.api_key && datas.api_key.length != 16) {
+                    alert("Invalid Read API Key");
+                    return false;
+                } else {
+                    datas.dynamic = $('[name=dynamic]').prop("checked");
+                    var redirect = url + "?" + $.param(datas); //+"&average="+is_avg+"&by="+by+"&range="+is_range+"&date_range="+date_range;
+                    window.location.href = redirect;
+                }
+            }
+        </script>
 
-<script>
-var app = angular.module("ddvApp", []);
+        <script>
+            var app = angular.module("ddvApp", []);
 
-app.controller("ddvCtrl", function($scope,$http,$httpParamSerializer) {
-	$scope.data = {dynamic: true, display:'single'};
-	$scope.form = {action: "show.html"};
-	$scope.channel = {};
-	$scope.fields = {};
-	$scope.types = ["line","column","spline","step"];
-	$scope.embeded = {src:null, width:800, height:600, default_width:800, default_height:600};
+            app.controller("ddvCtrl", function($scope, $http, $httpParamSerializer) {
+                $scope.data = {
+                    dynamic: true,
+                    display: 'single'
+                };
 
-	$scope.$watch("data.channelID",
-		function handleChange( newValue, oldValue ) {
+                $scope.form = {
+                    action: "show.html"
+                };
+                $scope.channel = {};
+                $scope.fields = {};
+                $scope.types = ["line", "column", "spline", "step"];
+                $scope.embeded = {
+                    src: null,
+                    width: 800,
+                    height: 600,
+                    default_width: 800,
+                    default_height: 600
+                };
 
-			if(angular.isNumber(newValue)){
-				$scope.getChannel();
-			} else {
-				$scope.channel = {}
-				$scope.updateFields()
-			}
-		}
-	);
+                $scope.$watch("data.channelID", function handleChange(newValue, oldValue) {
 
-$scope.$watch("data.api_key",
-function handleChange( newValue, oldValue ) {
+                    if (angular.isNumber(newValue)) {
+                        $scope.getChannel();
+                    } else {
+                        $scope.channel = {}
+                        $scope.updateFields()
+                    }
+                });
 
-	if(newValue && newValue.length==16){
-		$scope.getChannel();
-	} else {
-		$scope.channel = {}
-		$scope.updateFields()
-	}
-}, true
-);
+                $scope.$watch("data.api_key", function handleChange(newValue, oldValue) {
 
-$scope.$watch("data.display",
-function handleChange( newValue, oldValue ) {
-	if(newValue=="separate"){
-		$('#select_data_form').attr('action','show_multi.html');
-	} else {
-		$('#select_data_form').attr('action',$scope.form.action);
-	}
-});
+                    if (newValue && newValue.length == 16) {
+                        $scope.getChannel();
+                    } else {
+                        $scope.channel = {}
+                        $scope.updateFields()
+                    }
+                }, true);
 
-$scope.$watch("data",
-function handleChange( newValue, oldValue ) {
-	$scope.updateEmbededCode();
-}, true);
+                $scope.$watch("data.display", function handleChange(newValue, oldValue) {
+                    if (newValue == "separate") {
+                        $('#select_data_form').attr('action', 'show_multi.html');
+                    } else {
+                        $('#select_data_form').attr('action', $scope.form.action);
+                    }
+                });
 
+                $scope.$watch("data", function handleChange(newValue, oldValue) {
+                    $scope.updateEmbededCode();
+                }, true);
 
-$scope.updateEmbededCode = function(){
-	if (!$scope.data.channelID) {
-		$scope.embeded.html = null;
-		$scope.embeded.src = null;
-		return;
-	}
+                $scope.updateEmbededCode = function() {
+                    if (!$scope.data.channelID) {
+                        $scope.embeded.html = null;
+                        $scope.embeded.src = null;
+                        return;
+                    }
 
-	$scope.embeded.src 	= viewerURL + $scope.form.action +'?' + $httpParamSerializer($scope.data);
-	$scope.embeded.html = '<iframe src="'+$scope.embeded.src+'" width="'+ ($scope.embeded.width || $scope.embeded.default_width) +'" height="'+ ($scope.embeded.height || $scope.embeded.default_height) +'" frameborder="0">';
+                    $scope.embeded.src = viewerURL + $scope.form.action + '?' + $httpParamSerializer($scope.data);
+                    $scope.embeded.html = '<iframe src="' + $scope.embeded.src + '" width="' + ($scope.embeded.width || $scope.embeded.default_width) + '" height="' + ($scope.embeded.height || $scope.embeded.default_height) + '" frameborder="0">';
 
-}
+                }
 
-$scope.updateDataSelected = function() {
-	var listField=[];
-	var listType=[];
+                $scope.updateDataSelected = function() {
+                    var listField = [];
+                    var listType = [];
 
-	for (field in $scope.fields){
-		if ($scope.fields[field].selected){
-			listField.push(field);
-			listType.push($scope.fields[field].type);
-		}
+                    for (field in $scope.fields) {
+                        if ($scope.fields[field].selected) {
+                            listField.push(field);
+                            listType.push($scope.fields[field].type);
+                        }
 
-	}
-	$scope.data.fields = listField.join(",");
-	$scope.data.types = listType.join(",");
+                    }
+                    $scope.data.fields = listField.join(",");
+                    $scope.data.types = listType.join(",");
 
-	$('[name=fields]').val(listField.join(","));
-	$('[name=types]').val(listType.join(","));
-	console.log(listField.join(","));
-};
+                    $('[name=fields]').val(listField.join(","));
+                    $('[name=types]').val(listType.join(","));
+                    console.log(listField.join(","));
+                };
 
-$scope.getChannel = function(){
-	$http.get(serverURL+$scope.data.channelID+"/feeds.json?results=0&api_key="+$scope.data.api_key)
-	.then(function(response) {
-		$scope.channel = response.data.channel;
-		$scope.updateFields();
-	}, function(response) {
-		$scope.channel = {};
-		$scope.updateFields();
-	});
-}
+                $scope.getChannel = function() {
+                    $http.get(serverURL + $scope.data.channelID + "/feeds.json?results=0&api_key=" + $scope.data.api_key).then(function(response) {
+                        $scope.channel = response.data.channel;
+                        $scope.updateFields();
+                    }, function(response) {
+                        $scope.channel = {};
+                        $scope.updateFields();
+                    });
+                }
 
-$scope.updateFields = function(){
-	$scope.fields = {};
+                $scope.updateFields = function() {
+                    $scope.fields = {};
 
-	console.log($scope.channel);
+                    console.log($scope.channel);
 
-	for (var i = 1 ; (i <= 8); i++) {
-		console.log(i);
-		if ((fieldTxt+i) in $scope.channel){
-			console.log('\tfound');
-			$scope.fields[(fieldTxt+i)] = {name:(fieldTxt+i), selected:true};
-		}
+                    for (var i = 1; (i <= 8); i++) {
+                        console.log(i);
+                        if ((fieldTxt + i) in $scope.channel) {
+                            console.log('\tfound');
+                            $scope.fields[(fieldTxt + i)] = {
+                                name: (fieldTxt + i),
+                                selected: true
+                            };
+                        }
 
-	}
-	console.log($scope.fields);
+                    }
+                    console.log($scope.fields);
 
-	console.log($(form_object).serialize());
-}
+                    console.log($(form_object).serialize());
+                }
 
-$scope.isEmpty = function () {
-	for (var i in $scope.fields) if ($scope.fields.hasOwnProperty(i)) return false;
-	return true;
-};
-});
-
-</script>
-</body>
+                $scope.isEmpty = function() {
+                    for (var i in $scope.fields)
+                        if ($scope.fields.hasOwnProperty(i))
+                            return false;
+                return true;
+                };
+            });
+        </script>
+    </body>
 </html>

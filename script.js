@@ -210,16 +210,17 @@ function getUrlParameter(sParam) {
 			return sParameterName[1];
 		}
 	}
+	params = datas;
 	return datas;
 }
 
 function validateParams(){
 	var datas = getUrlParameter();
 	if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
-		alert("Invalid Channel ID");
+		// alert("Invalid Channel ID");
 		return false;
 	} else if ( datas.api_key && datas.api_key.length != 16 ) {
-		alert("Invalid Read API Key");
+		// alert("Invalid Read API Key");
 		return false;
 	}
 

@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-  <div id="container" style=" min-width: 310px" class="infobox"></div>
+  <div id="container" style=" min-width: 310px" class="infobox"><center>Invalid Channel</center></div>
   <!-- Preloader -->
   <script src="bower_components/jquery/dist/jquery.min.js"></script>
   <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -27,7 +27,9 @@
   <script>
   $(function () {
     params = getUrlParameter();
-    validateParams();
+    if (!validateParams()){
+      return;
+    }
     //Fetch channel information
     getChannelInfo(updateChannelShow);
 
