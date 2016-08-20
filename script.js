@@ -179,7 +179,8 @@ var createChart = function (seriesOptions) {
 					name: channel.data[name].name,
 					data: list,
 					type: ( validTypes.indexOf(channel.data[name].type) > -1  ? channel.data[name].type : 'line' ),
-					step: channel.data[name].type=="step" ? 'left' : false
+					step: (channel.data[name].type=="step") ? 'left' : false,
+					dataGrouping : {enabled: !(channel.data[name].type=="step")},
 				};
 
 			})
@@ -215,12 +216,15 @@ function getUrlParameter(sParam) {
 }
 
 function validateParams(){
+	var invalidMessage ="Invalid Channel ID or invalid Read API key."
 	var datas = getUrlParameter();
 	if ( !Number(datas.channelID) || Number(datas.channelID)<1 ) {
 		// alert("Invalid Channel ID");
+		$("#container").html(invalidMessage);
 		return false;
 	} else if ( datas.api_key && datas.api_key.length != 16 ) {
 		// alert("Invalid Read API Key");
+		$("#container").html(invalidMessage);
 		return false;
 	}
 
