@@ -82,10 +82,13 @@ var createChart = function (seriesOptions) {
 
 			legend: {
 				enabled: true,
-				layout: 'vertical',
-				align: 'right',
-				verticalAlign: 'middle',
-				borderWidth: 0
+				borderWidth: 0,
+				// layout: 'vertical',
+				// align: 'center',
+				// verticalAlign: 'middle',
+        align: 'left',
+        verticalAlign: 'top',
+        y: 25
 			},
 
 			plotOptions: {
@@ -153,8 +156,8 @@ var createChart = function (seriesOptions) {
 
 		$.each(channel.list, function (i, name) {
 
-			var option = config;//{results : config.results, api_key : params.api_key}
-			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param(option);
+			var option = $.extend({},config);//{results : config.results, api_key : params.api_key}
+			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param( $.extend(option, params) );
 
 			$.getJSON(fetch_url,    function (data) {
 
@@ -205,7 +208,9 @@ function getUrlParameter(sParam) {
 	for (var i = 0; i < sURLVariables.length; i++)
 	{
 		var sParameterName = sURLVariables[i].split('=');
-		datas[sParameterName[0]] = sParameterName[1];
+		if (sParameterName[1]){
+				datas[sParameterName[0]] = sParameterName[1];
+		}
 		if (sParameterName[0] == sParam)
 		{
 			return sParameterName[1];
@@ -317,7 +322,7 @@ function handleLoaded(series){
 	setInterval(function() {
 
 		var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
-		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param(option);
+		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param($.extend(option, params));
 
 		$.getJSON(fetch_url,    function (data) {
 

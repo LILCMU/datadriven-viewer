@@ -215,6 +215,7 @@
 
         <script src="bower_components/jquery/dist/jquery.min.js"></script>
         <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="bower_components/moment/moment.js"></script>
         <script src="bower_components/angular/angular.js"></script>
         <script src="script.js"></script>
 
@@ -331,7 +332,17 @@
                         return;
                     }
 
-                    $scope.embeded.src = viewerURL + $scope.form.action + '?' + $httpParamSerializer($scope.data);
+
+                    $scope.params = angular.copy($scope.data);
+                    if ($scope.params.start) {
+                      $scope.params.start = moment($scope.params.start).format('YYYY-MM-DD HH:mm:SS');
+                      console.log($scope.params.start);
+                    }
+                    $scope.embeded.src = viewerURL + $scope.form.action + '?' + $httpParamSerializer($scope.params);
+
+                    $scope.embeded.src = $scope.embeded.src.replace('+', '%20')
+
+                    console.log($scope.embeded.src);
                     $scope.embeded.html = '<iframe src="' + $scope.embeded.src + '" width="' + ($scope.embeded.width || $scope.embeded.default_width) + '" height="' + ($scope.embeded.height || $scope.embeded.default_height) + '" frameborder="0">';
 
                 }
