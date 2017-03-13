@@ -157,7 +157,7 @@ var createChart = function (seriesOptions) {
 		$.each(channel.list, function (i, name) {
 
 			var option = $.extend({},config);//{results : config.results, api_key : params.api_key}
-			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+$.param( $.extend(option, params) );
+			var fetch_url = serverURL+params.channelID+'/field/'+name+'.json?'+ decodeURIComponent( $.param( $.extend(option, params) ) );
 
 			$.getJSON(fetch_url,    function (data) {
 
@@ -322,7 +322,7 @@ function handleLoaded(series){
 	setInterval(function() {
 
 		var option = {results : config.results, api_key : params.api_key, start:channel.updated_at}
-		var fetch_url = serverURL+params.channelID+'/feeds.json?'+$.param($.extend(option, params));
+		var fetch_url = serverURL+params.channelID+'/feeds.json?'+decodeURIComponent($.param($.extend(option, params)));
 
 		$.getJSON(fetch_url,    function (data) {
 
